@@ -4,6 +4,9 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, confusion_matrix
+
+import matplotlib.pyplot as plt
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
@@ -11,8 +14,12 @@ from tensorflow.keras.utils import to_categorical
 
 
 # Signs we are recognizing
-SIGNS = ["A", "B", "C", "D", "E"]
-
+SIGNS = [
+    "A", "B", "C", "D", "E", "F", "G",
+    "H", "I", "J", "K", "L", "M", "N",
+    "O", "P", "Q", "R", "S", "T", "U",
+    "V", "W", "X", "Y", "Z"
+]
 X = []
 y = []
 
@@ -80,8 +87,8 @@ X_test = scaler.transform(X_test)
 # CONVERT LABELS
 # =========================
 
-y_train = to_categorical(y_train, num_classes=5)
-y_test = to_categorical(y_test, num_classes=5)
+y_train = to_categorical(y_train, num_classes=26)
+y_test = to_categorical(y_test, num_classes=26)
 
 
 # =========================
@@ -100,7 +107,7 @@ model = Sequential([
 
     Dense(32, activation="relu"),
 
-    Dense(5, activation="softmax")
+    Dense(26, activation="softmax")
 ])
 
 
@@ -148,6 +155,76 @@ print("TRAINING COMPLETED!")
 print("==============================")
 
 print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
+
+# =========================
+# MODEL EVALUATION
+# =========================
+
+# Get predictions
+y_pred_prob = model.predict(X_test)
+y_pred = np.argmax(y_pred_prob, axis=1)
+
+# Convert actual labels back to numbers
+y_true = np.argmax(y_test, axis=1)
+
+
+# =========================
+# CLASSIFICATION REPORT
+# =========================
+
+print()
+print("==============================")
+print("CLASSIFICATION REPORT")
+print("==============================")
+
+print(classification_report(
+    y_true,
+    y_pred,
+    target_names=SIGNS
+))
+
+
+# =========================
+# CONFUSION MATRIX
+# =========================
+
+cm = confusion_matrix(y_true, y_pred)
+
+print()
+print("==============================")
+print("CONFUSION MATRIX")
+print("==============================")
+
+print(cm)
+
+
+# =========================
+# DISPLAY CONFUSION MATRIX
+# =========================
+
+plt.figure(figsize=(12, 10))
+
+plt.imshow(cm)
+
+plt.title("Sign Language Confusion Matrix")
+plt.xlabel("Predicted Label")
+plt.ylabel("Actual Label")
+
+plt.xticks(
+    np.arange(len(SIGNS)),
+    SIGNS
+)
+
+plt.yticks(
+    np.arange(len(SIGNS)),
+    SIGNS
+)
+
+plt.colorbar()
+
+plt.tight_layout()
+
+plt.show()
 
 
 # =========================
